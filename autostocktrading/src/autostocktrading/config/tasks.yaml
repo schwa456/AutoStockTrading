@@ -1,47 +1,82 @@
-# 1. 유망 섹터 리서치 태스크
 sector_research_task:
   description: >
-    현재 시장 상황과 {topic} 트렌드를 분석하여, 향후 6개월 내 가장 유망해 보이는
-    투자 섹터 3개를 선정하고 그 이유를 보고하라.
+    '{topic}' 주제와 관련된 최신 뉴스 및 시장 트렌드를 분석하여,
+    가장 유망해 보이는 투자 섹터 1개를 선정하고 그 이유를 보고하라.
   expected_output: >
-    선정된 3개 섹터의 이름과 선정 이유를 명확하게 기술한 보고서.
+    선정된 1개 섹터의 이름과 2~3줄의 선정 이유를 포함한 간단한 보고서.
   agent: sector_researcher
 
-# 2. 티커 스크리닝 태스크
 ticker_screening_task:
   description: >
-    주어진 {market} 시장에서 거래 가능한 모든 종목의 티커를 수집하여 리스트로 반환하라.
+    'sector_research_task'에서 전달받은 유망 섹터 정보를 바탕으로,
+    {market} 시장에서 해당 섹터에 속하는 모든 종목의 티커를 수집하여 리스트로 반환하라.
+    (테스트 환경이므로, 실제 섹터 분류 대신 시장 전체 티커를 반환해도 무방하다.)
   expected_output: >
     Python 리스트 형태의 티커 목록.
   agent: ticker_screener
-  
-# 3. 재무 데이터 수집 태스크
+  context:
+    - sector_research_task
+
 fundamental_fetching_task:
   description: >
-    Ticker Screener에게서 전달받은 티커 목록을 바탕으로, 각 종목의 핵심 재무 지표(PER, PBR, EPS, DIV)를
-    수집하여 데이터프레임 형태로 정리하라.
+    'ticker_screening_task'에서 전달받은 티커 목록 중, 시가총액 상위 5개 종목에 대해서만
+    핵심 재무 지표(PER, PBR, EPS, DIV)를 수집하여 데이터프레임 형태로 정리하라.
   expected_output: >
-    종목 티커를 인덱스로 하고, 재무 지표들을 컬럼으로 하는 Pandas DataFrame.
+    상위 5개 종목의 재무 지표를 담은 Pandas DataFrame.
   agent: fundamental_fetcher
   context:
-    - ticker_screening_task # 이전 태스크의 결과물을 입력으로 사용
+    - ticker_screening_task
 
-# 4. 가치 평가 태스크
-valuation_task:
+valuation_analysis_task:
   description: >
-    ...
-  
+    'fundamental_fetching_task'에서 전달받은 5개 종목의 재무 데이터를 기반으로,
+    MockValuationTool을 사용하여 멀티 팩터 점수를 매기고 투자 매력도를 평가하라.
+  expected_output: >
+    각 종목의 투자 매력도 점수와 간단한 평가 요약을 담은 보고서.
+  agent: valuation_analyst
+  context:
+    - fundamental_fetching_task
 
-# 최종 트레이딩 계획 수립 태스크
+insider_ownership_analysis_task:
+  description: >
+    'valuation_analysis_task'에서 평가된 종목들에 대해,
+    MockInsiderAnalysisTool을 사용하여 기관의 자금 흐름을 분석하라.
+  expected_output: >
+    기관의 순매수/순매도 동향과 자금 흐름 분석 결과를 담은 보고서.
+  agent: insider_ownership_analyst
+  context:
+    - valuation_analysis_task
+
+risk_analysis_task:
+  description: >
+    'insider_ownership_analysis_task'의 분석 결과를 참고하여 최종 후보 종목들을 선정하고,
+    MockRiskAnalysisTool을 사용하여 종목들 간의 상관관계 매트릭스를 생성하고 리스크를 분석하라.
+  expected_output: >
+    종목 간 상관관계 분석 및 포트폴리오 분산 효과에 대한 리스크 분석 보고서.
+  agent: risk_analyst
+  context:
+    - insider_ownership_analysis_task
+
+allocation_task:
+  description: >
+    지금까지의 모든 분석 결과(가치 평가, 기관 동향, 리스크 분석)를 종합하여,
+    MockAllocationTool을 사용하여 최종 포트폴리오의 각 종목별 투자 비중을 결정하라.
+  expected_output: >
+    각 종목의 이름과 할당된 투자 비중(%)을 명시한 최종 포트폴리오 구성안.
+  agent: allocator
+  context:
+    - valuation_analysis_task
+    - insider_ownership_analysis_task
+    - risk_analysis_task
+
 trade_planning_task:
   description: >
-    Allocator에게서 전달받은 최적 포트폴리오 비중을 바탕으로,
-    각 종목별 정확한 매수 수량과 주문 가격 전략을 포함한 최종 트레이딩 계획을 수립하라.
+    'allocation_task'에서 결정된 포트폴리오 구성안에 따라,
+    MockTradingPlannerTool을 사용하여 구체적인 매수 주문 계획을 수립하라.
   expected_output: >
-    매수할 종목, 수량, 목표 가격, 주문 방식(시장가/지정가) 등을 포함한
-    구체적인 실행 계획 보고서
+    매수할 종목, 주문 방식(시장가/지정가), 목표 가격 등을 포함한 최종 실행 계획 보고서.
+    이 보고서를 'trading_plan.md' 파일로 저장하라.
   agent: trader_planner
   context:
-    - valuation_task
-    - risk_analysis_task
     - allocation_task
+  output_file: 'trading_plan.md'

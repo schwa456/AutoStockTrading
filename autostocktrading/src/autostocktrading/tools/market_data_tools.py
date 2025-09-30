@@ -115,3 +115,39 @@ class CorrelationMatrixTool(BaseTool):
         daily_returns = price_df.pct_change().dropna()
         correlation_matrix = daily_returns.corr()
         return correlation_matrix
+
+class MockValuationTool(BaseTool):
+    name: str = "Mock Valuation Tool"
+    description: str = "재무 데이터를 바탕으로 멀티 팩터 점수를 매기는 것을 시뮬레이션합니다."
+
+    def _run(self, **kwargs) -> str:
+        # 실제로는 복잡한 계산이 필요하지만, 테스트를 위해 간단한 텍스트를 반환합니다.
+        return "선별된 5개 종목에 대한 멀티 팩터 점수: A(95), B(92), C(88), D(85), E(81)"
+
+class MockInsiderAnalysisTool(BaseTool):
+    name: str = "Mock Insider Ownership Analysis Tool"
+    description: str = "기관 자금 흐름을 추적하는 것을 시뮬레이션합니다."
+
+    def _run(self, **kwargs) -> str:
+        return "최근 1개월간 기관은 종목 A, C에 대해 순매수, 종목 B, D, E에 대해서는 중립 포지션을 유지함."
+
+class MockRiskAnalysisTool(BaseTool):
+    name: str = "Mock Risk Analysis Tool"
+    description: str = "상관관계 매트릭스를 생성하는 것을 시뮬레이션합니다."
+
+    def _run(self, **kwargs) -> str:
+        return "종목 A와 C는 높은 양의 상관관계, 나머지 종목과는 낮은 상관관계를 보임. 포트폴리오 분산 효과 양호."
+
+class MockAllocationTool(BaseTool):
+    name: str = "Mock Allocator Tool"
+    description: str = "포지션 크기를 결정하는 것을 시뮬레이션합니다."
+
+    def _run(self, **kwargs) -> str:
+        return "최적 포트폴리오 비중 결정: 종목 A(30%), C(30%), B(20%), E(20%). 종목 D는 제외."
+
+class MockTradingPlannerTool(BaseTool):
+    name: str = "Mock Trader Planner Tool"
+    description: str = "매수 주문 계획을 결정하는 것을 시뮬레이션합니다."
+
+    def _run(self, **kwargs) -> str:
+        return "최종 매수 계획: 종목 A, C는 장 시작 동시호가에 시장가 매수. 종목 B, E는 현재가 대비 -1% 지정가 매수."
