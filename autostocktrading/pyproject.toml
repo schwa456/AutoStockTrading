@@ -1,0 +1,23 @@
+[project]
+name = "autostocktrading"
+version = "0.1.0"
+description = "AutoStockTrading using crewAI"
+authors = [{ name = "schwa456", email = "itkw456@gmail.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai[tools]>=0.201.1,<1.0.0"
+]
+
+[project.scripts]
+autostocktrading = "autostocktrading.main:run"
+run_crew = "autostocktrading.main:run"
+train = "autostocktrading.main:train"
+replay = "autostocktrading.main:replay"
+test = "autostocktrading.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
