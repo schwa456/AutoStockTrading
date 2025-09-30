@@ -1,0 +1,7 @@
+crewai
+crewai-tools
+langchain-community
+langchain-ollama
+python-dotenv
+pykrx
+pandas
