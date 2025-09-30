@@ -19,6 +19,8 @@ def run():
     """
     inputs = {
         'market': 'KOSPI',
+        'topic': '반도체 및 AI',
+        'investment_theme': 'HBM'
     }
     
     try:
