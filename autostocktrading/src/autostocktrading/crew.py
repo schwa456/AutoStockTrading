@@ -4,7 +4,7 @@ from crewai.agents.agent_builder.base_agent import BaseAgent
 from langchain.tools import DuckDuckGoSearchRun
 from typing import List
 
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 
 from .tools.economic_tools import *
 from .tools.market_data_tools import *
@@ -20,7 +20,7 @@ class Autostocktrading():
     tasks: List[Task]
 
     def __init__(self):
-        self.ollama_llm = Ollama(model='ollama/exaone-deep')
+        self.ollama_llm = OllamaLLM(model='ollama/exaone-deep')
         self.search_tool = DuckDuckGoSearchRun()
 
     # 1: Market Trend Analyst
@@ -30,7 +30,7 @@ class Autostocktrading():
             role='Market Trend Analyst',
             goal='현재 보유 포트폴리오와 시장 상황을 종합 분석하여, 리밸런싱을 포함한 최적의 투자 방향을 결정한다.',
             backstory="경제와 산업 전반을 아우르는 넓은 시야를 가진 분석가. 데이터와 최신 트렌드를 결합하여 미래 시장을 예측하는 능력이 탁월하다.",
-            tools=[self.search_tool, EconomicIndicatorTool(), PortfolioReaderTool()],
+            tools=[self.search_tool, KREconomicIndicatorTool(), USEconomicIndicatorTool(), PortfolioReaderTool()],
             verbose=True,
             llm=self.ollama_llm
         )

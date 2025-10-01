@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-class EconomicIndicatorTool(BaseTool):
+class KREconomicIndicatorTool(BaseTool):
     name: str = "South Korea Economic Indicator Tool"
     description: str = "한국은행(BOK) API를 사용하여 대한민국의 주요 거시 경제 지표(기준금리, 소비자 물가 지수)를 조회합니다."
 
@@ -35,3 +35,39 @@ class EconomicIndicatorTool(BaseTool):
 
         except Exception as e:
             return f"경제 지표 조회 중 오류가 발생했습니다.: {e}"
+
+class USEconomicIndicatorTool(BaseTool):
+    name: str = "U.S. Economic Indicator Tool"
+    description: str = "FRED API 를 사용하여 미국의 주요 거시 경제 지표(연방기금 금리, CPI)를 조회합니다."
+
+    def _run(self) -> str:
+        api_key = os.getenv('FRED_API_KEY')
+        if not api_key:
+            return "[에러]: .env 파일에 FRED_API_KEY가 설정되어 있지 않습니다"
+
+        indicators = []
+        base_url = "https://api.stlouisfed.org/fred/series/observations"
+
+        # 조회할 지표 ID (FRED에서 제공)
+        series_ids = {
+            "연방기금 금리": "FEDFUNDS",
+            "소비자물가지수(전년 동기 대비)": "CPIAUCSL_PC1"
+        }
+
+        try:
+            for name, series_id in series_ids.items():
+                params = {
+                    'series_id': series_id,
+                    'api_key': api_key,
+                    'file_type': 'json',
+                    'sort_order': 'desc',
+                    'limit': 1
+                }
+                response = requests.get(base_url, params=params)
+                data = response.json()
+                latest_observation = data['observations'][0]
+                indicators.append(f"  - 최신 {name}: {latest_observation['value']}% (기준일: {latest_observation['date']})")
+
+                return "미국 주요 경제 지표 현황:\n" + "\n".join(indicators)
+        except Exception as e:
+            return f"미국 경제 지표 조회 중 오류가 발생했습니다.: {e}"

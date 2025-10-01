@@ -34,7 +34,7 @@ if __name__ == '__main__':
     # 스케줄러로 매일 실행
     scheduler = BlockingScheduler()
     # 매일 오전 9시 5분에 run_trading_cycle 함수를 실행하도록 스케줄링
-    scheduler.add_job(run_trading_cycle(), 'cron', hour=9, minute=5)
+    scheduler.add_job(run_trading_cycle, 'cron', hour=9, minute=5)
 
     print("자동 투자 시스템이 시작되었습니다. 매일 오전 9시 5분에 자동으로 실행됩니다.")
     try:
