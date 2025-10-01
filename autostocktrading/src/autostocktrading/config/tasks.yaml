@@ -10,7 +10,6 @@ ticker_screening_task:
   description: >
     'sector_research_task'에서 전달받은 유망 섹터 정보를 바탕으로,
     {market} 시장에서 해당 섹터에 속하는 모든 종목의 티커를 수집하여 리스트로 반환하라.
-    (테스트 환경이므로, 실제 섹터 분류 대신 시장 전체 티커를 반환해도 무방하다.)
   expected_output: >
     Python 리스트 형태의 티커 목록.
   agent: ticker_screener
@@ -30,7 +29,7 @@ fundamental_fetching_task:
 valuation_analysis_task:
   description: >
     'fundamental_fetching_task'에서 전달받은 5개 종목의 재무 데이터를 기반으로,
-    MockValuationTool을 사용하여 멀티 팩터 점수를 매기고 투자 매력도를 평가하라.
+    ValuationTool을 사용하여 멀티 팩터 점수를 매기고 투자 매력도를 평가하라.
   expected_output: >
     각 종목의 투자 매력도 점수와 간단한 평가 요약을 담은 보고서.
   agent: valuation_analyst
@@ -40,7 +39,7 @@ valuation_analysis_task:
 insider_ownership_analysis_task:
   description: >
     'valuation_analysis_task'에서 평가된 종목들에 대해,
-    MockInsiderAnalysisTool을 사용하여 기관의 자금 흐름을 분석하라.
+    InsiderAnalysisTool을 사용하여 기관의 자금 흐름을 분석하라.
   expected_output: >
     기관의 순매수/순매도 동향과 자금 흐름 분석 결과를 담은 보고서.
   agent: insider_ownership_analyst
@@ -50,7 +49,7 @@ insider_ownership_analysis_task:
 risk_analysis_task:
   description: >
     'insider_ownership_analysis_task'의 분석 결과를 참고하여 최종 후보 종목들을 선정하고,
-    MockRiskAnalysisTool을 사용하여 종목들 간의 상관관계 매트릭스를 생성하고 리스크를 분석하라.
+    RiskAnalysisTool을 사용하여 종목들 간의 상관관계 매트릭스를 생성하고 리스크를 분석하라.
   expected_output: >
     종목 간 상관관계 분석 및 포트폴리오 분산 효과에 대한 리스크 분석 보고서.
   agent: risk_analyst
@@ -60,7 +59,7 @@ risk_analysis_task:
 allocation_task:
   description: >
     지금까지의 모든 분석 결과(가치 평가, 기관 동향, 리스크 분석)를 종합하여,
-    MockAllocationTool을 사용하여 최종 포트폴리오의 각 종목별 투자 비중을 결정하라.
+    AllocationTool을 사용하여 최종 포트폴리오의 각 종목별 투자 비중을 결정하라.
   expected_output: >
     각 종목의 이름과 할당된 투자 비중(%)을 명시한 최종 포트폴리오 구성안.
   agent: allocator
@@ -71,10 +70,11 @@ allocation_task:
 
 trade_planning_task:
   description: >
-    'allocation_task'에서 결정된 포트폴리오 구성안에 따라,
-    MockTradingPlannerTool을 사용하여 구체적인 매수 주문 계획을 수립하라.
+    'allocation_task'에서 결정된 포트폴리오 구성안과 
+    총 투자금({total_investment_amount}원)을 바탕으로,
+    TradePlannerTool을 사용하여 구체적인 매수 주문 계획을 수립하라.
   expected_output: >
-    매수할 종목, 주문 방식(시장가/지정가), 목표 가격 등을 포함한 최종 실행 계획 보고서.
+    매수할 종목, 주문 방식, 매수 수량, 예상 주문 금액 등을 포함한 최종 실행 계획 보고서.
     이 보고서를 'trading_plan.md' 파일로 저장하라.
   agent: trader_planner
   context:

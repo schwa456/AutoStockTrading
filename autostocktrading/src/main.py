@@ -19,7 +19,8 @@ def run():
     """
     inputs = {
         'market': 'KOSPI',
-        'topic': 'AI 산업 전망'
+        'topic': 'AI 산업 전망',
+        'total_investment_amount': 10_000_000
     }
     
     try:

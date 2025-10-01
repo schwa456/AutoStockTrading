@@ -5,3 +5,4 @@ langchain-ollama
 python-dotenv
 pykrx
 pandas
+duckduckgo-search
