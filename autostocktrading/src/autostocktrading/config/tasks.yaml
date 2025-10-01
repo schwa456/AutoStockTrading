@@ -103,3 +103,14 @@ trade_planning_task:
   context:
     - allocation_task
   output_file: 'trading_plan.md'
+
+trade_execution_task:
+  description: >
+    'trade_planning_task'에서 수립된 최종 매매 계획을 검토하고,
+    계획에 명시된 각 종목에 대해 TradeExecutorTool을 사용하여
+    매수 주문을 정확하게 실행하라.
+  expected_output: >
+    모든 주문의 실행 결과 요약 보고서
+  agent: trade_executor
+  context:
+    - trade_planning_task

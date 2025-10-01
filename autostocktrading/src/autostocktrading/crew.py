@@ -6,7 +6,7 @@ from typing import List
 
 from langchain_community.llms import Ollama
 
-from .tools.economic_tools import EconomicIndicatorTool
+from .tools.economic_tools import *
 from .tools.market_data_tools import *
 from .tools.financial_tools import *
 from .tools.trading_tools import *
@@ -22,16 +22,15 @@ class Autostocktrading():
     def __init__(self):
         self.ollama_llm = Ollama(model='ollama/exaone-deep')
         self.search_tool = DuckDuckGoSearchRun()
-        self.economic_tool = EconomicIndicatorTool()
 
     # 1: Market Trend Analyst
     @agent
     def market_trend_analyst(self) -> Agent:
         return Agent(
             role='Market Trend Analyst',
-            goal='거시 경제 지표와 시장 뉴스를 종합 분석하여 유망 투자 섹터를 자율적으로 발굴한다.',
+            goal='현재 보유 포트폴리오와 시장 상황을 종합 분석하여, 리밸런싱을 포함한 최적의 투자 방향을 결정한다.',
             backstory="경제와 산업 전반을 아우르는 넓은 시야를 가진 분석가. 데이터와 최신 트렌드를 결합하여 미래 시장을 예측하는 능력이 탁월하다.",
-            tools=[self.search_tool, self.economic_tool],
+            tools=[self.search_tool, EconomicIndicatorTool(), PortfolioReaderTool()],
             verbose=True,
             llm=self.ollama_llm
         )
@@ -108,7 +107,7 @@ class Autostocktrading():
             llm=self.ollama_llm
         )
 
-    # 6: Insider Ownership Analyst
+    # 7: Insider Ownership Analyst
     @agent
     def insider_ownership_analyst(self) -> Agent:
         return Agent(
@@ -121,7 +120,7 @@ class Autostocktrading():
             llm=self.ollama_llm
         )
 
-    # 7: Risk Analyst
+    # 8: Risk Analyst
     @agent
     def risk_analyst(self) -> Agent:
         return Agent(
@@ -134,7 +133,7 @@ class Autostocktrading():
             llm=self.ollama_llm
         )
 
-    # 8: Allocator
+    # 9: Allocator
     @agent
     def allocator(self) -> Agent:
         return Agent(
@@ -147,7 +146,7 @@ class Autostocktrading():
             llm=self.ollama_llm
         )
 
-    # 9: Trader Planner
+    # 10: Trader Planner
     @agent
     def trader_planner(self) -> Agent:
         return Agent(
@@ -156,6 +155,18 @@ class Autostocktrading():
             backstory="실행력 있는 트레이딩 전략가. 거래 비용을 최소화할 수 있는 최적의 주문 시점과 방식을 결정한다.",
             tools=[TradingPlannerTool()],
             allow_delegation=False,
+            verbose=True,
+            llm=self.ollama_llm
+        )
+
+    # 11: Trade Executor
+    @agent
+    def trade_executor(self) -> Agent:
+        return Agent(
+            role="Trade Executor",
+            goal="수립된 매매 계획을 오차 없이 정확하게 실행하고 그 결과를 기록한다.",
+            backstory='냉철하고 신속한 판단력을 지닌 트레이더. 감정의 개입 없이 오직 계획에 따라서만 주문을 집행한다.',
+            tools=[TradeExecutorTool()],
             verbose=True,
             llm=self.ollama_llm
         )
@@ -202,6 +213,9 @@ class Autostocktrading():
     def trade_planning_task(self) -> Task:
         return Task(config=self.tasks_config['trade_planning_task'], agent=self.trader_planner())
 
+    @task
+    def trade_execution_task(self) -> Task:
+        return Task(config=self.tasks_config['trade_execution_task'], agent=self.trade_executor())
 
     @crew
     def crew(self) -> Crew:
