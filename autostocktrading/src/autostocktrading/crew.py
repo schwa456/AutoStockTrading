@@ -6,6 +6,7 @@ from typing import List
 
 from langchain_community.llms import Ollama
 
+from .tools.economic_tools import EconomicIndicatorTool
 from .tools.market_data_tools import *
 from .tools.financial_tools import *
 from .tools.trading_tools import *
@@ -21,21 +22,39 @@ class Autostocktrading():
     def __init__(self):
         self.ollama_llm = Ollama(model='ollama/exaone-deep')
         self.search_tool = DuckDuckGoSearchRun()
+        self.economic_tool = EconomicIndicatorTool()
 
-    # 1: Sector Researcher
+    # 1: Market Trend Analyst
+    @agent
+    def market_trend_analyst(self) -> Agent:
+        return Agent(
+            role='Market Trend Analyst',
+            goal='거시 경제 지표와 시장 뉴스를 종합 분석하여 유망 투자 섹터를 자율적으로 발굴한다.',
+            backstory="경제와 산업 전반을 아우르는 넓은 시야를 가진 분석가. 데이터와 최신 트렌드를 결합하여 미래 시장을 예측하는 능력이 탁월하다.",
+            tools=[self.search_tool, self.economic_tool],
+            verbose=True,
+            llm=self.ollama_llm
+        )
+
+    # 2: Sector Researcher
     @agent
     def sector_researcher(self) -> Agent:
         return Agent(
-            role='Sector Reasercher',
+            role='Sector Researcher',
             goal='성장 가능성이 높은 투자 섹터와 해당 섹터 내 유망 기업을 찾아낸다.',
-            backstory="거시 경제와 산업 트렌드 분석의 대가. 최신 기술, 정책 변화, 사회적 트렌드를 분석하여 미래 유망 산업을 예측한다.",
+            backstory=(
+                "거시 경제와 산업 트렌드 분석의 대가. "
+                "최신 기술, 정책 변화, 사회적 트렌드를 분석하여 미래 유망 산업을 예측한다. "
+                "특히, 한국 시장 분석을 위해 네이버 뉴스(news.naver.com)의 정보를 최우선으로 활용하여 "
+                "신뢰도 높은 분석을 수행한다."
+            ),
             tools=[self.search_tool],
             allow_delegation=False,
             verbose=True,
             llm=self.ollama_llm
         )
 
-    # 2: Ticker Screener
+    # 3: Ticker Screener
     @agent
     def ticker_screener(self) -> Agent:
         return Agent(
@@ -48,7 +67,7 @@ class Autostocktrading():
             llm=self.ollama_llm
         )
 
-    # 3: Fundamental Fetcher
+    # 4: Fundamental Fetcher
     @agent
     def fundamental_fetcher(self) -> Agent:
         return Agent(
@@ -61,7 +80,7 @@ class Autostocktrading():
             llm=self.ollama_llm
         )
 
-    # 4: Valuation Analyst
+    # 5: Valuation Analyst
     @agent
     def valuation_analyst(self) -> Agent:
         return Agent(
@@ -74,7 +93,22 @@ class Autostocktrading():
             llm=self.ollama_llm
         )
 
-    # 5: Insider Ownership Analyst
+    # 6: ESG Analyst
+    @agent
+    def esg_analyst(self) -> Agent:
+        return Agent(
+            role='ESG Analyst',
+            goal='기업의 사회적, 환경적 영향을 분석하여 잠재적인 윤리적 리스크를 식별한다.',
+            backstory=(
+                "당신은 기업의 재무적 성과 너머를 보는 윤리적 투자 전문가입니다."
+                "뉴스기사, NGO 보고서, 소셜 미디어 등을 샅샅이 뒤져가며 기업의 숨겨진 사회적 리스크를 찾아내는 데 특화되어 있습니다."
+            ),
+            tools=[self.search_tool],
+            verbose=True,
+            llm=self.ollama_llm
+        )
+
+    # 6: Insider Ownership Analyst
     @agent
     def insider_ownership_analyst(self) -> Agent:
         return Agent(
@@ -87,7 +121,7 @@ class Autostocktrading():
             llm=self.ollama_llm
         )
 
-    # 6: Risk Analyst
+    # 7: Risk Analyst
     @agent
     def risk_analyst(self) -> Agent:
         return Agent(
@@ -100,7 +134,7 @@ class Autostocktrading():
             llm=self.ollama_llm
         )
 
-    # 7: Allocator
+    # 8: Allocator
     @agent
     def allocator(self) -> Agent:
         return Agent(
@@ -113,7 +147,7 @@ class Autostocktrading():
             llm=self.ollama_llm
         )
 
-    # 8: Trader Planner
+    # 9: Trader Planner
     @agent
     def trader_planner(self) -> Agent:
         return Agent(
@@ -129,6 +163,10 @@ class Autostocktrading():
 
     # --- Tasks ---
     @task
+    def trend_analysis_task(self) -> Task:
+        return Task(config=self.tasks_config['trend_analysis_task'], agent=self.market_trend_analyst())
+
+    @task
     def sector_research_task(self) -> Task:
         return Task(config=self.tasks_config['sector_research_task'], agent=self.sector_researcher())
 
@@ -143,6 +181,10 @@ class Autostocktrading():
     @task
     def valuation_analysis_task(self) -> Task:
         return Task(config=self.tasks_config['valuation_analysis_task'], agent=self.valuation_analyst())
+
+    @task
+    def esg_analysis_task(self) -> Task:
+        return Task(config=self.tasks_config['esg_analysis_task'], agent=self.esg_analyst())
 
     @task
     def insider_ownership_analysis_task(self) -> Task:

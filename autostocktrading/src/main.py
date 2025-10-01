@@ -8,18 +8,12 @@ from autostocktrading.crew import Autostocktrading
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
-# This main file is intended to be a way for you to run your
-# crew locally, so refrain from adding unnecessary logic into this file.
-# Replace with inputs you want to test with, it will automatically
-# interpolate any tasks and agents information
-
 def run():
     """
     Run the crew.
     """
     inputs = {
         'market': 'KOSPI',
-        'topic': 'AI 산업 전망',
         'total_investment_amount': 10_000_000
     }
     

@@ -6,3 +6,4 @@ python-dotenv
 pykrx
 pandas
 duckduckgo-search
+requests

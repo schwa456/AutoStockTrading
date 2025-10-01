@@ -1,3 +1,14 @@
+trend_analysis_task:
+  description: >
+    EconomicIndicatorTool과 웹 검색을 활용하여, 현재 시점의 대한민국 거시 경제 상황과
+    글로벌 기술/산업 트렌드를 종합적으로 분석하라.
+    이를 바탕으로 향후 3~6개월간 가장 유망할 것으로 판단되는 투자 섹터(테마)를 1개 선정하고,
+    그 선정 이유를 명확하게 설명하라.
+  expected_output: >
+    선정된 유망 투자 섹터 이름과 그 이유를 담은 분석 보고서.
+    이 결과는 다음 Sector Researcher에게 전달될 것이다.
+  agent: market_trend_analyst
+
 sector_research_task:
   description: >
     '{topic}' 주제와 관련된 최신 뉴스 및 시장 트렌드를 분석하여,
@@ -36,6 +47,17 @@ valuation_analysis_task:
   context:
     - fundamental_fetching_task
 
+esg_analysis_task:
+  description: >
+    'valuation_analysis_task'에서 긍정적으로 평가된 종목들에 대해,
+    웹 검색을 활용하여 각 기업의 ESG(환경, 사회, 지배구조) 관련 부정적 뉴스가 있는지 심층적으로 조사하라.
+    (예: 환경 규제 위반, 부당 노동 행위, 경영진의 비윤리적 문제 등)
+  expected_output: >
+    각 종목별 ESG 리스크 분석 보고서. 심각한 문제가 발견된 경우 '투자 부적합'으로 명시할 것.
+  agent: esg_analyst
+  context:
+    - valuation_analysis_task
+
 insider_ownership_analysis_task:
   description: >
     'valuation_analysis_task'에서 평가된 종목들에 대해,
@@ -44,7 +66,7 @@ insider_ownership_analysis_task:
     기관의 순매수/순매도 동향과 자금 흐름 분석 결과를 담은 보고서.
   agent: insider_ownership_analyst
   context:
-    - valuation_analysis_task
+    - esg_analysis_task
 
 risk_analysis_task:
   description: >
@@ -65,6 +87,7 @@ allocation_task:
   agent: allocator
   context:
     - valuation_analysis_task
+    - esg_analysis_task
     - insider_ownership_analysis_task
     - risk_analysis_task
 
