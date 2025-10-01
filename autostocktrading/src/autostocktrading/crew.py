@@ -7,6 +7,9 @@ from typing import List
 from langchain_community.llms import Ollama
 
 from .tools.market_data_tools import *
+from .tools.financial_tools import *
+from .tools.trading_tools import *
+from .tools.portfolio_tools import *
 
 @CrewBase
 class Autostocktrading():
