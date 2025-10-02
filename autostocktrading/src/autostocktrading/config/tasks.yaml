@@ -1,6 +1,6 @@
 trend_analysis_task:
   description: >
-    EconomicIndicatorTool과 웹 검색을 활용하여, 현재 시점의 대한민국 거시 경제 상황과
+    KREconomicIndicatorTool, USEconomicIndicatorTool과 웹 검색을 활용하여, 현재 시점의 대한민국 거시 경제 상황과
     글로벌 기술/산업 트렌드를 종합적으로 분석하라.
     이를 바탕으로 향후 3~6개월간 가장 유망할 것으로 판단되는 투자 섹터(테마)를 1개 선정하고,
     그 선정 이유를 명확하게 설명하라.
@@ -11,11 +11,14 @@ trend_analysis_task:
 
 sector_research_task:
   description: >
-    '{topic}' 주제와 관련된 최신 뉴스 및 시장 트렌드를 분석하여,
-    가장 유망해 보이는 투자 섹터 1개를 선정하고 그 이유를 보고하라.
+    'trend_analysis_task'로부터 전달받은 유망 투자 섹터에 대해 심층적인 분석을 수행하라.
+    이전 태스크의 결과물(유망 투자 섹터 이름)을 명확히 인지하고,
+    그 주제를 키워드로 사용하여 네이버 뉴스에서 관련 기업들을 찾아내야 한다.
   expected_output: >
-    선정된 1개 섹터의 이름과 2~3줄의 선정 이유를 포함한 간단한 보고서.
+    선정된 섹터와 관련된 주요 기업 리스트와 간단한 분석 요약.
   agent: sector_researcher
+  context:
+    - trend_analysis_task
 
 ticker_screening_task:
   description: >
@@ -93,9 +96,9 @@ allocation_task:
 
 trade_planning_task:
   description: >
-    'allocation_task'에서 결정된 포트폴리오 구성안과 
-    총 투자금({total_investment_amount}원)을 바탕으로,
-    TradePlannerTool을 사용하여 구체적인 매수 주문 계획을 수립하라.
+    'allocation_task'에서 결정된 포트폴리오 구성안을 바탕으로 최종 매매 계획을 수립하라.
+    현재 투자에 사용할 수 있는 총 가용 현금은 가장 첫 단계에서 분석한 포트폴리오 상태의 'cash' 값이다.
+    이 가용 현금을 사용하여 TradePlannerTool로 구체적인 매수 주문 계획을 수립해야 한다.
   expected_output: >
     매수할 종목, 주문 방식, 매수 수량, 예상 주문 금액 등을 포함한 최종 실행 계획 보고서.
     이 보고서를 'trading_plan.md' 파일로 저장하라.

@@ -1,7 +1,6 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai.agents.agent_builder.base_agent import BaseAgent
-from langchain.tools import DuckDuckGoSearchRun
 from typing import List
 
 from langchain_ollama import OllamaLLM
@@ -9,6 +8,7 @@ from langchain_ollama import OllamaLLM
 from .tools.economic_tools import *
 from .tools.market_data_tools import *
 from .tools.financial_tools import *
+from .tools.search_tools import *
 from .tools.trading_tools import *
 from .tools.portfolio_tools import *
 
@@ -21,7 +21,6 @@ class Autostocktrading():
 
     def __init__(self):
         self.ollama_llm = OllamaLLM(model='ollama/exaone-deep')
-        self.search_tool = DuckDuckGoSearchRun()
 
     # 1: Market Trend Analyst
     @agent
@@ -30,7 +29,7 @@ class Autostocktrading():
             role='Market Trend Analyst',
             goal='현재 보유 포트폴리오와 시장 상황을 종합 분석하여, 리밸런싱을 포함한 최적의 투자 방향을 결정한다.',
             backstory="경제와 산업 전반을 아우르는 넓은 시야를 가진 분석가. 데이터와 최신 트렌드를 결합하여 미래 시장을 예측하는 능력이 탁월하다.",
-            tools=[self.search_tool, KREconomicIndicatorTool(), USEconomicIndicatorTool(), PortfolioReaderTool()],
+            tools=[NaverNewsSearchTool(), KREconomicIndicatorTool(), USEconomicIndicatorTool(), PortfolioReaderTool()],
             verbose=True,
             llm=self.ollama_llm
         )
@@ -47,7 +46,7 @@ class Autostocktrading():
                 "특히, 한국 시장 분석을 위해 네이버 뉴스(news.naver.com)의 정보를 최우선으로 활용하여 "
                 "신뢰도 높은 분석을 수행한다."
             ),
-            tools=[self.search_tool],
+            tools=[NaverNewsSearchTool()],
             allow_delegation=False,
             verbose=True,
             llm=self.ollama_llm
@@ -102,7 +101,7 @@ class Autostocktrading():
                 "당신은 기업의 재무적 성과 너머를 보는 윤리적 투자 전문가입니다."
                 "뉴스기사, NGO 보고서, 소셜 미디어 등을 샅샅이 뒤져가며 기업의 숨겨진 사회적 리스크를 찾아내는 데 특화되어 있습니다."
             ),
-            tools=[self.search_tool],
+            tools=[NaverNewsSearchTool()],
             verbose=True,
             llm=self.ollama_llm
         )

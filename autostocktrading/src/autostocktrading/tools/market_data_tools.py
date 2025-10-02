@@ -8,22 +8,26 @@ import math
 
 class TickerListToolInput(BaseModel):
     """Input Schema for TickerListTool"""
-    market: str = Field(..., description="지정된 시장 이름(KOSPI, KOSDAQ)")
+    market: str = Field(description="지정된 시장 이름(KOSPI, KOSDAQ)")
 
 class TickerListTool(BaseTool):
     name: str = "TickerListTool"
-    description: str = (
-        "지정한 시장(KOSPI, KOSDAQ)의 모든 종목 티커 목록을 조회하는 도구입니다."
-    )
-
+    description: str = "지정한 시장(KOSPI, KOSDAQ)의 모든 종목 티커 목록을 조회하는 도구입니다."
     args_schema: Type[BaseModel] = TickerListToolInput
 
     def _run(self, market: str) -> list:
         today = datetime.now().strftime("%Y%m%d")
 
         try:
-            tickers = stock.get_market_ticker_list(today, market=market)
-            return tickers
+            if isinstance(market, dict):
+                market_name = market.get('description', '')
+                if market_name in ['KOSPI', 'KOSDAQ']:
+                    return stock.get_market_ticker_list(today, market=market_name)
+
+            if isinstance(market, str) and market in ['KOSPI', 'KOSDAQ']:
+                return stock.get_market_ticker_list(today, market=market)
+
+            return ["오류: market 인자는 'KOSPI' 또는 'KOSDAQ' 문자열이어야 합니다."]
 
         except Exception as e:
             return [f"{market} 시장의 티커 목록을 가져오는데 실패했습니다: {e}"]

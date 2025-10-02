@@ -31,6 +31,7 @@ if __name__ == '__main__':
     # 1회만 실행
     run_trading_cycle()
 
+    """
     # 스케줄러로 매일 실행
     scheduler = BlockingScheduler()
     # 매일 오전 9시 5분에 run_trading_cycle 함수를 실행하도록 스케줄링
@@ -41,3 +42,4 @@ if __name__ == '__main__':
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
         pass
+    """
