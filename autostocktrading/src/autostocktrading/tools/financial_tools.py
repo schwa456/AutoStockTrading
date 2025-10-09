@@ -20,12 +20,12 @@ class StockFundamentalTool(BaseTool):
         today = datetime.now().strftime("%Y%m%d")
 
         try:
-            df = stock.get_market_fundamental(today, today, ticker)
+            df = stock.get_market_fundamental(today, ticker=ticker)
 
             if df.empty:
                 return {"error": f"{ticker}에 대한 재무 정보를 찾을 수 없습니다."}
 
-            fundamentals = df.iloc[0].to_dict()
+            fundamentals = df.iloc[-1].to_dict()
             return fundamentals
 
         except Exception as e:

@@ -2,6 +2,7 @@ from crewai.tools import BaseTool
 import requests
 import os
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -16,22 +17,43 @@ class KREconomicIndicatorTool(BaseTool):
 
         indicators = []
 
+        today = datetime.now()
+        end_date = today - timedelta(days=30)
+        start_date = end_date - timedelta(days=365)
+        end_date_str = end_date.strftime("%Y%m")
+        start_date_str = start_date.strftime("%Y%m")
+
         try:
             # 기준금리 조회
-            url_base_rate = f"https://ecos.bok.or.kr/api/StatisticSearch/{api_key}/json/kr/1/10/028Y001/MM/202301/202512/0101000"
+            url_base_rate = f"https://ecos.bok.or.kr/api/StatisticSearch/{api_key}/json/kr/1/10/028Y001/MM/{start_date_str}/{end_date_str}/0101000"
             response_rate = requests.get(url_base_rate)
+            response_rate.raise_for_status()
             rate_data = response_rate.json()
-            latest_rate = rate_data['StatisticSearch']['row'][-1]
-            indicators.append(f"  - 최신 기준금리: {latest_rate['DATA_VALUE']}% (기준일: {latest_rate['TIME']}")
+
+            if 'StatisticSearch' not in rate_data or not rate_data['StatisticSearch'].get('row'):
+                error_message = rate_data.get('RESULT', {}).get('MESSAGE', '데이터 없음')
+                indicators.append(f"  - 기준금리: 조회 실패 ({error_message})")
+            else:
+                latest_rate = rate_data['StatisticSearch']['row'][-1]
+                indicators.append(f"  - 최신 기준금리: {latest_rate['DATA_VALUE']}% (기준일: {latest_rate['TIME']}")
 
             # 소비자 물가 지수(CPI) 조회 (전년 동월 대비 증감율)
-            url_cpi = f"https://ecos.bok.or.kr/api/StatisticSearch/{api_key}/json/kr/1/10/901Y009/MM/202301/202512/0"
+            url_cpi = f"https://ecos.bok.or.kr/api/StatisticSearch/{api_key}/json/kr/1/10/901Y009/MM/{start_date_str}/{end_date_str}/0"
             response_cpi = requests.get(url_cpi)
+            response_cpi.raise_for_status()
             cpi_data = response_cpi.json()
-            latest_cpi = cpi_data['StatisticSearch']['row'][-1]
-            indicators.append(f"  - 최신 소비자물가지수(전년 동월 대비): {latest_cpi['DATA_VALUE']}% (기준일: {latest_cpi['TIME']})")
+
+            if 'StatisticSearch' not in cpi_data or not cpi_data['StatisticSearch'].get('row'):
+                error_message = cpi_data.get('RESULT', {}).get('MESSAGE', '데이터 없음')
+                indicators.append(f"  - 소비자물가지수: 조회 실패 ({error_message})")
+            else:
+                latest_cpi = cpi_data['StatisticSearch']['row'][-1]
+                indicators.append(f"  - 최신 소비자물가지수(전년 동월 대비): {latest_cpi['DATA_VALUE']}% (기준일: {latest_cpi['TIME']})")
 
             return "대한민국 주요 경제 지표 현황:\n" + "\n".join(indicators)
+
+        except requests.exceptions.RequestException as e:
+            return f"API 요청 실패: {e}"
 
         except Exception as e:
             return f"경제 지표 조회 중 오류가 발생했습니다.: {e}"
@@ -65,9 +87,17 @@ class USEconomicIndicatorTool(BaseTool):
                 }
                 response = requests.get(base_url, params=params)
                 data = response.json()
-                latest_observation = data['observations'][0]
-                indicators.append(f"  - 최신 {name}: {latest_observation['value']}% (기준일: {latest_observation['date']})")
 
-                return "미국 주요 경제 지표 현황:\n" + "\n".join(indicators)
+                if not data.get('observations'):
+                    indicators.append(f"  - {name}: 조회 실패 (데이터 없음)")
+                else:
+                    latest_observation = data['observations'][0]
+                    indicators.append(f"  - 최신 {name}: {latest_observation['value']}% (기준일: {latest_observation['date']})")
+
+            return "미국 주요 경제 지표 현황:\n" + "\n".join(indicators)
+
+        except requests.exceptions.RequestException as e:
+            return f"API 요청 실패: {e}"
+
         except Exception as e:
             return f"미국 경제 지표 조회 중 오류가 발생했습니다.: {e}"

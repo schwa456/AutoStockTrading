@@ -223,5 +223,6 @@ class Autostocktrading():
             agents=self.agents,
             tasks=self.tasks,
             process=Process.sequential,
+            tracing=True,
             verbose=True,
         )
